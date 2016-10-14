@@ -3,11 +3,7 @@ var fs = require('fs');
 var formidable = require('formidable');
 var util = require('util');
 
-const server = http.createServer(function (req, res) {
-    if (req.method.toLowerCase() == 'post') {
-      processAllFieldsOfTheForm(req, res);
-    }
-  });
+const server = http.createServer();
 
 const nextRequest = (() => {
   let requestNumber = 0;
@@ -16,6 +12,12 @@ const nextRequest = (() => {
 
 server.on('request', (request, response) => {
   const requestNumber = nextRequest();
+
+  if (request.method.toLowerCase() == 'post') {
+    processAllFieldsOfTheForm(request, response);
+    return;
+  }
+
   response.writeHead(200);
   if (request.url === '/lyda') {
     response.write(`Hi Lyda!!! - ${requestNumber} ${request.url}`);
@@ -68,17 +70,17 @@ server.on('request', (request, response) => {
 });
 
 function processAllFieldsOfTheForm(req, res) {
-  var form = new formidable.IncomingForm();
+  const form = new formidable.IncomingForm();
   form.parse(req, function (err, fields, files) {
-      res.writeHead(200, {
-          'content-type': 'text/plain',
-        });
-      res.write(`hello my name is: ${fields.firstname} ,
+    res.writeHead(200, {
+      'content-type': 'text/plain',
+    });
+    res.write(`hello my name is: ${fields.firstname} ,
       my lastname is: ${fields.lastname} and
       I am: ${fields.age} years old`);
       res.end();
     });
-}
+  }
 
-server.listen(8090);
-console.log('Listening on port 8090');
+  server.listen(8090);
+  console.log('Listening on port 8090');
